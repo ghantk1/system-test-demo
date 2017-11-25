@@ -7,8 +7,17 @@ pipeline {
       }
     }
     stage('Deploy from stable branches') {
-      steps {
-        echo 'stable'
+      parallel {
+        stage('Deploy from stable branches') {
+          steps {
+            echo 'stable'
+          }
+        }
+        stage('Artifacts download from Maven Central or release location') {
+          steps {
+            echo 'download'
+          }
+        }
       }
     }
     stage('Deploy Single System Def') {
@@ -16,27 +25,33 @@ pipeline {
         echo 'System Def'
       }
     }
-    stage('System Level Testing') {
+    stage('Run System Level Testing') {
       steps {
         echo 'System Level Testing'
       }
     }
     stage('Update Dashboards') {
-      steps {
-        parallel(
-          "Update Dashboards": {
+      parallel {
+        stage('Update Dashboards') {
+          steps {
             echo 'Update Dashboards'
-            
-          },
-          "Notify Errors": {
-            echo 'errors'
-            
-          },
-          "Generate Reports": {
-            echo 'reports'
-            
           }
-        )
+        }
+        stage('Notify Errors') {
+          steps {
+            echo 'errors'
+          }
+        }
+        stage('Generate Reports') {
+          steps {
+            echo 'reports'
+          }
+        }
+      }
+    }
+    stage('Publish Release') {
+      steps {
+        echo 'publish'
       }
     }
   }
